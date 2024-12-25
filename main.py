@@ -6,6 +6,8 @@ from datetime import datetime
 import json
 import zipfile
 import platform
+import threading
+
 
 def browse_folder():
     ''' Opens FileDialog to choose path. '''
@@ -107,6 +109,12 @@ def clear_status():
     ''' Reset status label. '''
     status_label.configure(text="")
 
+def clone_repo_thread():
+    """Runs the clone_repo logic in a separate thread."""
+    thread = threading.Thread(target=clone_repo)
+    thread.daemon = True # ensures the thread will close when the main program exits
+    thread.start()
+
 def on_window_close():
     ''' Action when the window is closed. '''
     root.destroy()
@@ -171,7 +179,7 @@ zip_checkbox = ctk.CTkCheckBox(root, text="Create ZIP Archive", variable=zip_bac
 zip_checkbox.grid(row=4, column=2, columnspan=2, sticky="w", padx=10, pady=5)
 
 # Clone Button
-clone_button = ctk.CTkButton(root, text="Clone", command=clone_repo)
+clone_button = ctk.CTkButton(root, text="Clone", command=clone_repo_thread)
 clone_button.grid(row=5, column=0, columnspan=3, pady=10)
 
 # Clear Button
