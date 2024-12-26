@@ -10,14 +10,14 @@ import threading
 
 
 def browse_folder():
-    ''' Opens FileDialog to choose path. '''
+    """ Opens a folder dialog for selecting the save path. """
     folder_selected = filedialog.askdirectory()
     if folder_selected:
         path_entry.delete(0, ctk.END)
         path_entry.insert(0, folder_selected)
 
 def is_valid_repo_url(url):
-    """Prüft, ob die GitHub-URL ein gültiges Repository ist."""
+    """ Validates if the provided GitHub URL is a valid repository. """
     try:
         subprocess.run(["git", "ls-remote", url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         return True
@@ -25,24 +25,27 @@ def is_valid_repo_url(url):
         return False
 
 def update_status(message, color):
+    """ Updates the status label with a message and clears it after 3 seconds. """
     status_label.configure(text=message, text_color=color)
-    root.after(3000, clear_status)
+    app.after(3000, clear_status)
 
 def log_action(action):
+    """ Logs actions or errors to a log file. """
     with open("log.txt", "a") as log_file:
         log_file.write(f"{datetime.now()} - {action}\n")
 
 def zip_folder(folder_path):
+    """ Creates a ZIP archive for the specified folder. """
     zip_name = f"{folder_path}.zip"
     with zipfile.ZipFile(zip_name, 'w') as zipf:
-        for root, _, files in os.walk(folder_path):
+        for app, _, files in os.walk(folder_path):
             for file in files:
-                zipf.write(os.path.join(root, file),
-                           os.path.relpath(os.path.join(root, file), folder_path))
+                zipf.write(os.path.join(app, file),
+                           os.path.relpath(os.path.join(app, file), folder_path))
     log_action(f"Created ZIP archive: {zip_name}")
 
 def clone_repo():
-    ''' Clone the GitHub Repository. '''
+    """ Clones the GitHub repository and handles backup and ZIP options. """
     github_url = github_url_entry.get()
     folder_name = folder_name_entry.get()
     target_path = path_entry.get()
@@ -77,7 +80,7 @@ def clone_repo():
         log_action(f"Error cloning {github_url}: {e}")
 
 def clear_entries():
-    ''' Remove all text from Text Entry. '''
+    """ Clears all input fields and resets options. """
     github_url_entry.delete(0, ctk.END)
     folder_name_entry.delete(0, ctk.END)
     path_entry.delete(0, ctk.END)
@@ -85,7 +88,7 @@ def clear_entries():
     backup_checkbox_var.set(True)
 
 def save_last_used_repo(github_url, path):
-    ''' Save the GitHub URL and save path for faster backup creation as JSON. '''
+    """ Saves the last used GitHub URL and path to a JSON file. """
     data = {
         "github_url": github_url,
         "path": path
@@ -98,7 +101,7 @@ def save_last_used_repo(github_url, path):
     print(f"Last used repo saved to: {json_file_path}")
 
 def load_last_used_repo():
-    ''' Load the last used JSON, if it exists. '''
+    """ Loads the last saved GitHub URL and path from a JSON file. """
     if os.path.exists("last_used_repo.json"):
         with open("last_used_repo.json", "r") as json_file:
             data = json.load(json_file)
@@ -106,7 +109,7 @@ def load_last_used_repo():
             path_entry.insert(0, data.get("path", ""))
 
 def clear_status():
-    ''' Reset status label. '''
+    """ Clears the status label. """
     status_label.configure(text="")
 
 def clone_repo_thread():
@@ -116,11 +119,11 @@ def clone_repo_thread():
     thread.start()
 
 def on_window_close():
-    ''' Action when the window is closed. '''
-    root.destroy()
+    """ Action when the window is closed. """
+    app.destroy()
 
 def center_window(app, width, height):
-    ''' Center window when running program. '''
+    """ Center window when running program. """
     screen_width = app.winfo_screenwidth()
     screen_height = app.winfo_screenheight()
 
@@ -130,71 +133,71 @@ def center_window(app, width, height):
     app.geometry(f"{width}x{height}+{x_position}+{y_position}")
 
 def open_log():
+    """ Opens the log file in the default text editor. """
     if os.path.exists("log.txt"):
         os.system("notepad log.txt" if platform.system() == "Windows" else "open log.txt")
     else:
         messagebox.showinfo("Info", "Log file not found.")
 
 
-# Main Application
+# GUI setup - Main Application
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("green")
 
-root = ctk.CTk()
-root.title("GitBackupTool Pro")
-root.protocol("WM_DELETE_root", on_window_close)
-root.geometry("700x350")
-center_window(root, 700, 350)
+app = ctk.CTk()
+app.title("GitBackupTool Pro")
+app.protocol("WM_DELETE_app", on_window_close)
+app.geometry("700x350")
+center_window(app, 700, 350)
 
-# Status Labels
-status_label = ctk.CTkLabel(root, text="")
+## UI Elements
+# Status Label
+status_label = ctk.CTkLabel(app, text="")
 status_label.grid(row=0, column=0, columnspan=3, pady=(5, 0), sticky="we")
 
 # GitHub URL Input
-ctk.CTkLabel(root, text="GitHub URL:").grid(row=1, column=0, padx=10, pady=(5, 0), sticky="e")
-github_url_entry = ctk.CTkEntry(root, width=300)
+ctk.CTkLabel(app, text="GitHub URL:").grid(row=1, column=0, padx=10, pady=(5, 0), sticky="e")
+github_url_entry = ctk.CTkEntry(app, width=300)
 github_url_entry.grid(row=1, column=1, padx=10, pady=(5, 0), sticky="we")
 
 # Folder Name Input
-ctk.CTkLabel(root, text="Folder Name:").grid(row=2, column=0, padx=10, pady=5, sticky="e")
-folder_name_entry = ctk.CTkEntry(root, width=300)
+ctk.CTkLabel(app, text="Folder Name:").grid(row=2, column=0, padx=10, pady=5, sticky="e")
+folder_name_entry = ctk.CTkEntry(app, width=300)
 folder_name_entry.grid(row=2, column=1, padx=10, pady=5, sticky="we")
 
 # Path Input
-ctk.CTkLabel(root, text="Save Path:").grid(row=3, column=0, padx=10, pady=5, sticky="e")
-path_entry = ctk.CTkEntry(root, width=300)
+ctk.CTkLabel(app, text="Save Path:").grid(row=3, column=0, padx=10, pady=5, sticky="e")
+path_entry = ctk.CTkEntry(app, width=300)
 path_entry.grid(row=3, column=1, padx=10, pady=5, sticky="we")
 
 # Browse Button
-browse_button = ctk.CTkButton(root, text="Browse", command=browse_folder)
+browse_button = ctk.CTkButton(app, text="Browse", command=browse_folder)
 browse_button.grid(row=3, column=2, padx=10, pady=5)
 
 # Backup Options
 backup_checkbox_var = ctk.BooleanVar(value=False)
-backup_checkbox = ctk.CTkCheckBox(root, text="Create Backup Folder", variable=backup_checkbox_var)
+backup_checkbox = ctk.CTkCheckBox(app, text="Create Backup Folder", variable=backup_checkbox_var)
 backup_checkbox.grid(row=4, column=0, columnspan=2, sticky="w", padx=10, pady=5)
 
 zip_backup_var = ctk.BooleanVar(value=False)
-zip_checkbox = ctk.CTkCheckBox(root, text="Create ZIP Archive", variable=zip_backup_var)
+zip_checkbox = ctk.CTkCheckBox(app, text="Create ZIP Archive", variable=zip_backup_var)
 zip_checkbox.grid(row=4, column=2, columnspan=2, sticky="w", padx=10, pady=5)
 
-# Clone Button
-clone_button = ctk.CTkButton(root, text="Clone", command=clone_repo_thread)
+# Action Buttoms
+clone_button = ctk.CTkButton(app, text="Clone", command=clone_repo_thread)
 clone_button.grid(row=5, column=0, columnspan=3, pady=10)
 
-# Clear Button
-clear_button = ctk.CTkButton(root, text="Clear", command=clear_entries)
+clear_button = ctk.CTkButton(app, text="Clear", command=clear_entries)
 clear_button.grid(row=6, column=0, columnspan=3, pady=5)
 
-# Open Log Button
-log_button = ctk.CTkButton(root, text="View Log", command=open_log)
+log_button = ctk.CTkButton(app, text="View Log", command=open_log)
 log_button.grid(row=7, column=0, columnspan=3, pady=5)
 
-# Load Last Used Repository
+# Load last used Repository
 load_last_used_repo()
 
 # Responsiveness
-root.grid_columnconfigure(1, weight=1)
+app.grid_columnconfigure(1, weight=1)
 
 # Mainloop
-root.mainloop()
+app.mainloop()
