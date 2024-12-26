@@ -84,7 +84,7 @@ def clear_entries():
     github_url_entry.delete(0, ctk.END)
     folder_name_entry.delete(0, ctk.END)
     path_entry.delete(0, ctk.END)
-    update_status("", "")
+    update_status("", "black")
     backup_checkbox_var.set(True)
 
 def save_last_used_repo(github_url, path):
@@ -146,58 +146,84 @@ ctk.set_default_color_theme("green")
 
 app = ctk.CTk()
 app.title("GitBackupTool Pro")
+app.geometry("700x320")
+app.minsize(700,320)
 app.protocol("WM_DELETE_app", on_window_close)
-app.geometry("700x350")
 center_window(app, 700, 350)
 
+## Frames
+main_frame = ctk.CTkFrame(app)
+main_frame.pack(padx=5, pady=5, fill="both", expand=True)
+
+fr_status_label = ctk.CTkFrame(main_frame)
+fr_status_label.pack(padx=5, pady=4, fill="x")
+
+fr_url = ctk.CTkFrame(main_frame)
+fr_url.pack(padx=5, pady=4, fill="x")
+
+fr_folder = ctk.CTkFrame(main_frame)
+fr_folder.pack(padx=5, pady=4, fill="x")
+
+fr_save_path = ctk.CTkFrame(main_frame)
+fr_save_path.pack(padx=5, pady=4, fill="x")
+
+fr_checkbox = ctk.CTkFrame(main_frame)
+fr_checkbox.pack(padx=5, pady=4, fill="x")
+
+fr_buttons = ctk.CTkFrame(main_frame)
+fr_buttons.pack(padx=5, pady=4, fill="x")
+
+
 ## UI Elements
-# Status Label
-status_label = ctk.CTkLabel(app, text="")
-status_label.grid(row=0, column=0, columnspan=3, pady=(5, 0), sticky="we")
+# Status label for feedback
+status_label = ctk.CTkLabel(fr_status_label, text="")
+status_label.pack(side="top", pady=5)
 
-# GitHub URL Input
-ctk.CTkLabel(app, text="GitHub URL:").grid(row=1, column=0, padx=10, pady=(5, 0), sticky="e")
-github_url_entry = ctk.CTkEntry(app, width=300)
-github_url_entry.grid(row=1, column=1, padx=10, pady=(5, 0), sticky="we")
+# GitHub URL input
+url_label = ctk.CTkLabel(fr_url, text="GitHub URL:")
+url_label.pack(side="left", padx=10, pady=(5, 0))
 
-# Folder Name Input
-ctk.CTkLabel(app, text="Folder Name:").grid(row=2, column=0, padx=10, pady=5, sticky="e")
-folder_name_entry = ctk.CTkEntry(app, width=300)
-folder_name_entry.grid(row=2, column=1, padx=10, pady=5, sticky="we")
+github_url_entry = ctk.CTkEntry(fr_url, width=300)
+github_url_entry.pack(side="left", padx=10, pady=(5, 0), expand=True, fill="x")
 
-# Path Input
-ctk.CTkLabel(app, text="Save Path:").grid(row=3, column=0, padx=10, pady=5, sticky="e")
-path_entry = ctk.CTkEntry(app, width=300)
-path_entry.grid(row=3, column=1, padx=10, pady=5, sticky="we")
+# Folder name input
+folder_label = ctk.CTkLabel(fr_folder, text="Folder Name:")
+folder_label.pack(side="left", padx=10, pady=5)
 
-# Browse Button
-browse_button = ctk.CTkButton(app, text="Browse", command=browse_folder)
-browse_button.grid(row=3, column=2, padx=10, pady=5)
+folder_name_entry = ctk.CTkEntry(fr_folder, width=300)
+folder_name_entry.pack(side="left", padx=10, pady=5, expand=True, fill="x")
 
-# Backup Options
+# Path input
+path_label = ctk.CTkLabel(fr_save_path, text="Save Path:")
+path_label.pack(side="left", padx=10, pady=5)
+
+path_entry = ctk.CTkEntry(fr_save_path, width=300)
+path_entry.pack(side="left", padx=10, pady=5, expand=True, fill="x")
+
+browse_button = ctk.CTkButton(fr_save_path, text="Browse", command=browse_folder)
+browse_button.pack(side="left", padx=10, pady=5)
+
+# Backup options
 backup_checkbox_var = ctk.BooleanVar(value=False)
-backup_checkbox = ctk.CTkCheckBox(app, text="Create Backup Folder", variable=backup_checkbox_var)
-backup_checkbox.grid(row=4, column=0, columnspan=2, sticky="w", padx=10, pady=5)
+backup_checkbox = ctk.CTkCheckBox(fr_checkbox, text="Create Backup Folder", variable=backup_checkbox_var)
+backup_checkbox.pack(side="top", pady=5)
 
 zip_backup_var = ctk.BooleanVar(value=False)
-zip_checkbox = ctk.CTkCheckBox(app, text="Create ZIP Archive", variable=zip_backup_var)
-zip_checkbox.grid(row=4, column=2, columnspan=2, sticky="w", padx=10, pady=5)
+zip_checkbox = ctk.CTkCheckBox(fr_checkbox, text="Create ZIP Archive", variable=zip_backup_var)
+zip_checkbox.pack(side="top", pady=5)
 
-# Action Buttoms
-clone_button = ctk.CTkButton(app, text="Clone", command=clone_repo_thread)
-clone_button.grid(row=5, column=0, columnspan=3, pady=10)
+# Action buttons
+clone_button = ctk.CTkButton(fr_buttons, text="Clone", command=clone_repo_thread)
+clone_button.pack(side="left", padx=5, pady=5)
 
-clear_button = ctk.CTkButton(app, text="Clear", command=clear_entries)
-clear_button.grid(row=6, column=0, columnspan=3, pady=5)
+clear_button = ctk.CTkButton(fr_buttons, text="Clear", command=clear_entries)
+clear_button.pack(side="left", padx=5, pady=5, expand=True)
 
-log_button = ctk.CTkButton(app, text="View Log", command=open_log)
-log_button.grid(row=7, column=0, columnspan=3, pady=5)
+log_button = ctk.CTkButton(fr_buttons, text="View Log", command=open_log)
+log_button.pack(side="right", padx=5, pady=5)
 
-# Load last used Repository
+# load last used Repository
 load_last_used_repo()
 
-# Responsiveness
-app.grid_columnconfigure(1, weight=1)
-
-# Mainloop
+# start the main application loop
 app.mainloop()
