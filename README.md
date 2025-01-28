@@ -13,13 +13,13 @@
 
 <br><hr>
 
-## 01. Motivation
+## 1. Motivation
 
 GitBackupTool-Pro was designed to simplify working with repositories. It aims to quickly clone new GitHub repositories using a user-friendly GUI or create local backups of existing repositories on GitHub. The tool is written entirely in Python with a strong focus on user experience (UX).
 
 <br><hr>
 
-## 02. Installation
+## 2. Installation
 
 ### Prerequisites
 - 1: **Git**: Ensure git is installed and added to your system's PATH. You can download it from [Git](https://git-scm.com).
